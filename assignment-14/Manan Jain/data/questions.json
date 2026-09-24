@@ -1,0 +1,130 @@
+[
+  {
+    "id": 1,
+    "category": "Tech",
+    "question": "What is Node.js runtime based on?",
+    "options": ["V8", "SpiderMonkey", "Chakra", "JVM"],
+    "correctOption": 0,
+    "explanation": "Node.js is built on Google Chrome's V8 engine."
+  },
+  {
+    "id": 2,
+    "category": "Tech",
+    "question": "Which of the following is NOT a JavaScript data type?",
+    "options": ["Undefined", "Boolean", "Float", "Symbol"],
+    "correctOption": 2,
+    "explanation": "JavaScript has 'Number' (which handles floats and integers), but 'Float' is not a distinct primitive type."
+  },
+  {
+    "id": 3,
+    "category": "Tech",
+    "question": "What protocol does Socket.io use under the hood before upgrading to WebSockets?",
+    "options": ["HTTP Long-Polling", "gRPC", "MQTT", "WebRTC"],
+    "correctOption": 0,
+    "explanation": "Socket.io starts with HTTP long-polling and upgrades to WebSocket if available."
+  },
+  {
+    "id": 4,
+    "category": "Tech",
+    "question": "In the Node.js event loop, which phase executes setTimeout callbacks?",
+    "options": ["Poll phase", "Check phase", "Timers phase", "Close callbacks"],
+    "correctOption": 2,
+    "explanation": "The Timers phase executes callbacks scheduled by setTimeout() and setInterval()."
+  },
+  {
+    "id": 5,
+    "category": "Tech",
+    "question": "What does HTTP status code 418 represent?",
+    "options": ["Bad Gateway", "I'm a teapot", "Upgrade Required", "Unavailable For Legal Reasons"],
+    "correctOption": 1,
+    "explanation": "HTTP 418 'I'm a teapot' was defined in RFC 2324 as an April Fools' joke and is recognized across the web."
+  },
+  {
+    "id": 6,
+    "category": "Tech",
+    "question": "Which SQL clause is used to filter aggregated grouped results?",
+    "options": ["WHERE", "HAVING", "GROUP BY", "FILTER"],
+    "correctOption": 1,
+    "explanation": "HAVING filters groups created by GROUP BY, while WHERE filters individual rows before grouping."
+  },
+  {
+    "id": 7,
+    "category": "Tech",
+    "question": "Which data structure uses LIFO (Last In, First Out) ordering?",
+    "options": ["Queue", "Binary Tree", "Stack", "Linked List"],
+    "correctOption": 2,
+    "explanation": "A Stack operates on Last-In, First-Out (LIFO) principle."
+  },
+  {
+    "id": 8,
+    "category": "Tech",
+    "question": "What does CORS stand for in web security?",
+    "options": ["Cross-Origin Resource Sharing", "Centralized Object Routing Standard", "Cross-Operation Request Security", "Core Origin Redirect System"],
+    "correctOption": 0,
+    "explanation": "CORS stands for Cross-Origin Resource Sharing, an HTTP-header based mechanism."
+  },
+  {
+    "id": 9,
+    "category": "Tech",
+    "question": "In Express.js, what is the third parameter typically passed to middleware functions?",
+    "options": ["req", "res", "next", "err"],
+    "correctOption": 2,
+    "explanation": "The standard middleware signature is (req, res, next) where next passes control to the next middleware."
+  },
+  {
+    "id": 10,
+    "category": "Tech",
+    "question": "Which of the following is true about Redis?",
+    "options": ["It is a relational database", "It is an in-memory key-value data store", "It only supports string values", "It does not support persistence"],
+    "correctOption": 1,
+    "explanation": "Redis is an in-memory data structure store used as a database, cache, and message broker."
+  },
+  {
+    "id": 11,
+    "category": "Tech",
+    "question": "What is the time complexity of looking up a key in a well-distributed Hash Table?",
+    "options": ["O(1)", "O(log n)", "O(n)", "O(n log n)"],
+    "correctOption": 0,
+    "explanation": "Average case lookup in a hash table is O(1) constant time."
+  },
+  {
+    "id": 12,
+    "category": "Tech",
+    "question": "Which Git command is used to combine multiple commits into a single commit?",
+    "options": ["git merge --squash", "git rebase -i", "git commit --amend", "All of the above"],
+    "correctOption": 3,
+    "explanation": "All listed methods (squash merge, interactive rebase, amend) can combine or rewrite commits."
+  },
+  {
+    "id": 13,
+    "category": "General",
+    "question": "Which planet in our solar system has the most moons?",
+    "options": ["Jupiter", "Saturn", "Mars", "Neptune"],
+    "correctOption": 1,
+    "explanation": "Saturn has 146 confirmed moons, the highest number of moons in our solar system."
+  },
+  {
+    "id": 14,
+    "category": "General",
+    "question": "What is the hardest natural substance on Earth?",
+    "options": ["Titanium", "Diamond", "Graphene", "Quartz"],
+    "correctOption": 1,
+    "explanation": "Diamond is the hardest naturally occurring mineral on Earth."
+  },
+  {
+    "id": 15,
+    "category": "General",
+    "question": "Which year was the World Wide Web introduced to the public?",
+    "options": ["1989", "1991", "1995", "1983"],
+    "correctOption": 1,
+    "explanation": "Tim Berners-Lee released the World Wide Web project to the public on August 6, 1991."
+  },
+  {
+    "id": 16,
+    "category": "General",
+    "question": "How many bits are there in a standard IPv4 address?",
+    "options": ["16", "32", "64", "128"],
+    "correctOption": 1,
+    "explanation": "IPv4 addresses are 32-bit numeric addresses written as four decimal numbers."
+  }
+]

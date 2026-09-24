@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Quiz Battle | Real-Time Multiplayer Live Quiz</title>
+  <meta name="description" content="A Kahoot-style real-time multiplayer live quiz battle powered by Node.js, Express, and Socket.io. Authoritative server timers and instant speed scoring.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .hero-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1.1rem;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.25rem);
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 3rem;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .action-card {
+      padding: 2.5rem 2rem;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--border-glow);
+    }
+
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .icon-host {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(99, 102, 241, 0.4);
+    }
+
+    .icon-player {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(244, 63, 94, 0.2));
+      border: 1px solid rgba(236, 72, 153, 0.4);
+    }
+
+    .card-title {
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      flex: 1;
+    }
+
+    .features-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      text-align: left;
+    }
+
+    .feature-item {
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .feature-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: var(--text-main);
+    }
+
+    .feature-text {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .quick-pin-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .quick-pin-input {
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      text-align: center;
+      max-width: 140px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-container">
+    <div>
+      <div class="badge-pill pulse-glow">
+        <span>⚡ Socket.io Real-Time Engine</span>
+        <span>•</span>
+        <span>Authoritative Server State</span>
+      </div>
+      <h1 class="hero-title">
+        Real-Time Live <span class="gradient-text">Quiz Battle</span>
+      </h1>
+      <p class="hero-subtitle">
+        Battle friends and colleagues in high-speed, live Kahoot-style trivia with authoritative sub-second server clock synchronization and speed bonus scoring.
+      </p>
+    </div>
+
+    <div class="action-grid">
+      <!-- Host Card -->
+      <div class="glass-panel action-card">
+        <div>
+          <div class="card-icon icon-host">👑</div>
+          <h2 class="card-title">Host a Quiz</h2>
+          <p class="card-desc">
+            Create a game room, select trivia categories, present live questions on the big screen, and view live animated podiums.
+          </p>
+        </div>
+        <div>
+          <a href="/host.html" class="btn btn-primary" style="width: 100%;" id="btn-host-quiz">
+            Create Room & Host 🚀
+          </a>
+        </div>
+      </div>
+
+      <!-- Player Card -->
+      <div class="glass-panel action-card">
+        <div>
+          <div class="card-icon icon-player">🎮</div>
+          <h2 class="card-title">Join a Battle</h2>
+          <p class="card-desc">
+            Enter a 4-digit PIN to join the lobby, lock in fast answers on your mobile gamepad, and climb the live leaderboard.
+          </p>
+        </div>
+        <div>
+          <form id="quick-join-form" onsubmit="handleQuickJoin(event)">
+            <div class="quick-pin-form">
+              <input 
+                type="text" 
+                id="quick-pin" 
+                class="form-input quick-pin-input" 
+                placeholder="4-DIGIT PIN" 
+                maxlength="4" 
+                pattern="[0-9]{4}" 
+                required
+                autocomplete="off"
+              >
+              <button type="submit" class="btn btn-primary" style="flex: 1;" id="btn-join-quick">
+                Join Game →
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature highlights -->
+    <div class="features-row">
+      <div class="feature-item">
+        <div class="feature-title">⏱️ 100% Server Timers</div>
+        <div class="feature-text">Zero client clock tampering. All deadline and speed calculations are executed server-side.</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-title">🎯 Instant Speed Scoring</div>
+        <div class="feature-text">500 base points + up to 500 millisecond-precision speed bonus for rapid answers.</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-title">🛡️ Strict Anti-Cheat</div>
+        <div class="feature-text">Answers are rejected post-deadline, duplicate names blocked, and solutions never leak beforehand.</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-title">🏆 Live Rank Podium</div>
+        <div class="feature-text">Automatic tie-breaking on cumulative response times with instant round reveals.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+  <script>
+    function handleQuickJoin(e) {
+      e.preventDefault();
+      const pin = document.getElementById('quick-pin').value.trim();
+      if (pin && pin.length === 4) {
+        window.location.href = `/player.html?pin=${encodeURIComponent(pin)}`;
+      } else {
+        showToast('Please enter a 4-digit PIN', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

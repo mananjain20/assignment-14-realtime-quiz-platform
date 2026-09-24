@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👑 Host Control | Quiz Battle</title>
+  <meta name="description" content="Host control panel for Real-Time Multiplayer Quiz Battle. Present questions, track answers in real-time, and display leaderboards.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .host-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1.5rem 3rem;
+      width: 100%;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .nav-brand {
+      font-size: 1.4rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* Screen containers */
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: block;
+      animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Create Screen */
+    .create-card {
+      max-width: 540px;
+      margin: 3rem auto;
+      padding: 2.5rem;
+      text-align: center;
+    }
+
+    /* Lobby Screen */
+    .pin-display-box {
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px dashed rgba(99, 102, 241, 0.4);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .pin-number {
+      font-size: clamp(3.5rem, 8vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: 0.25em;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+      margin: 0.5rem 0;
+      font-family: var(--font-heading);
+    }
+
+    .players-lobby-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+      min-height: 120px;
+    }
+
+    .player-chip {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      color: #fff;
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .player-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    /* Game Question Screen */
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .timer-ring-container {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .timer-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 4px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .timer-circle.danger {
+      border-color: #ef4444;
+      color: #ef4444;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+      animation: pulseGlow 0.5s infinite;
+    }
+
+    .question-box {
+      background: rgba(18, 24, 38, 0.9);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .question-title {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      line-height: 1.3;
+      color: #fff;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .option-card {
+      padding: 1.5rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .opt-0 { background: var(--btn-red); }
+    .opt-1 { background: var(--btn-blue); }
+    .opt-2 { background: var(--btn-yellow); }
+    .opt-3 { background: var(--btn-green); }
+
+    .opt-shape {
+      font-size: 1.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-card.correct-highlight {
+      box-shadow: 0 0 0 4px #10b981, 0 0 30px rgba(16, 185, 129, 0.8);
+      transform: scale(1.02);
+      z-index: 2;
+    }
+
+    .option-card.dimmed {
+      opacity: 0.25;
+      filter: grayscale(0.6);
+    }
+
+    /* Explanation Banner */
+    .explanation-box {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.75rem;
+      margin-top: 1.5rem;
+      text-align: left;
+    }
+
+    /* Leaderboard */
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 2rem 0;
+    }
+
+    .leaderboard-row {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .leaderboard-row.rank-1 {
+      border-color: #fbbf24;
+      background: linear-gradient(90deg, rgba(251, 191, 36, 0.15), rgba(30, 41, 59, 0.8));
+    }
+    .leaderboard-row.rank-2 {
+      border-color: #94a3b8;
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.15), rgba(30, 41, 59, 0.8));
+    }
+    .leaderboard-row.rank-3 {
+      border-color: #b45309;
+      background: linear-gradient(90deg, rgba(180, 83, 9, 0.15), rgba(30, 41, 59, 0.8));
+    }
+
+    .rank-badge {
+      font-size: 1.25rem;
+      font-weight: 800;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      margin-right: 1rem;
+    }
+
+    .podium-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 1.5rem;
+      margin: 3rem 0;
+      height: 240px;
+    }
+
+    .podium-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 140px;
+      text-align: center;
+    }
+
+    .podium-pillar {
+      width: 100%;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .pillar-1 { height: 160px; background: linear-gradient(180deg, #fbbf24, #d97706); }
+    .pillar-2 { height: 120px; background: linear-gradient(180deg, #94a3b8, #64748b); }
+    .pillar-3 { height: 90px; background: linear-gradient(180deg, #b45309, #78350f); }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #ec4899);
+      width: 100%;
+      transition: width 1s linear;
+    }
+  </style>
+</head>
+<body>
+  <div class="host-container">
+    <!-- Top Nav -->
+    <header class="top-nav">
+      <a href="/" class="nav-brand">
+        <span>⚡</span>
+        <span class="gradient-text">Quiz Battle Host</span>
+      </a>
+      <div id="room-pin-pill" class="badge-pill" style="display: none; margin-bottom: 0;">
+        PIN: <span id="nav-pin-val" style="font-weight: 800; color: #fff; margin-left: 4px;"></span>
+      </div>
+    </header>
+
+    <!-- 1. CREATE ROOM SCREEN -->
+    <section id="screen-create" class="screen active">
+      <div class="glass-panel create-card">
+        <h1 class="card-title" style="font-size: 2rem; margin-bottom: 0.5rem;">Host a Quiz Battle</h1>
+        <p class="card-desc" style="margin-bottom: 2rem;">Setup your live room and broadcast questions to players.</p>
+
+        <form id="create-quiz-form" onsubmit="handleCreateQuiz(event)">
+          <div class="input-group">
+            <label class="input-label" for="host-name">Host Name</label>
+            <input type="text" id="host-name" class="form-input" placeholder="e.g. Master Quizzer" value="Host" required>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="category-select">Trivia Category</label>
+            <select id="category-select" class="form-select">
+              <option value="Tech" selected>Tech & Web Development (12 Questions)</option>
+              <option value="General">General Knowledge & Science</option>
+              <option value="All">All Categories Mixed</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="btn-create-room">
+            Create Room & Generate PIN 🚀
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. LOBBY SCREEN -->
+    <section id="screen-lobby" class="screen">
+      <div class="pin-display-box">
+        <p style="color: var(--text-muted); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;">
+          Join at <span style="color: #a5b4fc;">localhost:5000/player.html</span> with PIN
+        </p>
+        <div class="pin-number" id="lobby-pin">----</div>
+        <p style="color: var(--text-dim); font-size: 0.9rem;">
+          Category: <span id="lobby-category" style="color: var(--text-main); font-weight: 600;"></span> • 5 Questions
+        </p>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.3rem;">Joined Players (<span id="player-count">0</span>)</h2>
+        <button id="btn-start-game" class="btn btn-primary" onclick="handleStartGame()" disabled>
+          Start Game 🏁
+        </button>
+      </div>
+
+      <div id="lobby-players-grid" class="players-lobby-grid">
+        <!-- Live player chips injected here -->
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-dim); padding: 2rem;" id="waiting-players-text">
+          Waiting for players to join...
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. QUESTION ACTIVE SCREEN -->
+    <section id="screen-question" class="screen">
+      <div class="question-header">
+        <div>
+          <span class="badge-pill" style="margin-bottom: 0.5rem;" id="q-counter">Question 1 of 5</span>
+          <div style="font-size: 0.9rem; color: var(--text-muted);">
+            Answers Received: <strong id="answer-progress-text" style="color: #fff;">0 / 0</strong>
+          </div>
+        </div>
+        <div class="timer-ring-container">
+          <div id="timer-display" class="timer-circle">15</div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div id="timer-progress-bar" class="progress-bar-fill"></div>
+      </div>
+
+      <div class="question-box" style="margin-top: 1.5rem;">
+        <h2 id="question-text" class="question-title">Question loading...</h2>
+      </div>
+
+      <div class="options-grid" id="options-grid">
+        <div class="option-card opt-0" id="opt-card-0">
+          <div class="opt-shape">▲</div>
+          <span id="opt-text-0">Option 1</span>
+        </div>
+        <div class="option-card opt-1" id="opt-card-1">
+          <div class="opt-shape">◆</div>
+          <span id="opt-text-1">Option 2</span>
+        </div>
+        <div class="option-card opt-2" id="opt-card-2">
+          <div class="opt-shape">●</div>
+          <span id="opt-text-2">Option 3</span>
+        </div>
+        <div class="option-card opt-3" id="opt-card-3">
+          <div class="opt-shape">■</div>
+          <span id="opt-text-3">Option 4</span>
+        </div>
+      </div>
+
+      <!-- Reveal Explanation (shown on question:time_up) -->
+      <div id="reveal-container" style="display: none;">
+        <div class="explanation-box">
+          <h3 style="color: #10b981; margin-bottom: 0.3rem; font-size: 1.1rem;">💡 Explanation:</h3>
+          <p id="explanation-text" style="color: #d1fae5; font-size: 1.05rem;"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. LEADERBOARD / PODIUM INTERMISSION SCREEN -->
+    <section id="screen-leaderboard" class="screen">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 class="card-title" style="font-size: 2.2rem;">Round Leaderboard 📊</h2>
+        <p class="card-desc">Next round starts in a few seconds...</p>
+      </div>
+
+      <div id="round-leaderboard-list" class="leaderboard-list" style="max-width: 650px; margin: 0 auto;">
+        <!-- Injected rows -->
+      </div>
+    </section>
+
+    <!-- 5. FINAL QUIZ ENDED SCREEN -->
+    <section id="screen-final" class="screen">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div class="badge-pill pulse-glow">🎉 QUIZ COMPLETED</div>
+        <h1 class="card-title" style="font-size: 2.8rem; margin-top: 0.5rem;">The Champions Podium</h1>
+      </div>
+
+      <!-- Top 3 Podium -->
+      <div class="podium-container" id="podium-container">
+        <!-- 2nd place -->
+        <div class="podium-column" id="podium-2">
+          <div style="font-size: 1.8rem;">🥈</div>
+          <div style="font-weight: 700; margin-bottom: 0.4rem;" id="podium-name-2">-</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;" id="podium-score-2">-</div>
+          <div class="podium-pillar pillar-2">2nd</div>
+        </div>
+        <!-- 1st place -->
+        <div class="podium-column" id="podium-1">
+          <div style="font-size: 2.3rem;">👑</div>
+          <div style="font-weight: 800; font-size: 1.15rem; margin-bottom: 0.4rem; color: #fbbf24;" id="podium-name-1">-</div>
+          <div style="font-size: 0.9rem; color: #fde68a; margin-bottom: 0.5rem;" id="podium-score-1">-</div>
+          <div class="podium-pillar pillar-1">1st</div>
+        </div>
+        <!-- 3rd place -->
+        <div class="podium-column" id="podium-3">
+          <div style="font-size: 1.8rem;">🥉</div>
+          <div style="font-weight: 700; margin-bottom: 0.4rem;" id="podium-name-3">-</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;" id="podium-score-3">-</div>
+          <div class="podium-pillar pillar-3">3rd</div>
+        </div>
+      </div>
+
+      <!-- Full Rank Table -->
+      <div class="glass-panel" style="max-width: 700px; margin: 2rem auto; padding: 1.5rem;">
+        <h3 style="margin-bottom: 1rem; font-size: 1.2rem;">Complete Standings</h3>
+        <div id="final-ranks-list" class="leaderboard-list">
+          <!-- Full list -->
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="/host.html" class="btn btn-primary">
+          Host Another Quiz 🔄
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let socket = null;
+    let currentPin = null;
+    let currentCategory = 'Tech';
+    let totalQuestions = 5;
+    let totalPlayersCount = 0;
+    let timerCountdownInterval = null;
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+    }
+
+    // Initialize socket connection
+    function initSocket() {
+      if (socket) return;
+      socket = io();
+
+      socket.on('quiz:created', (data) => {
+        currentPin = data.pin;
+        document.getElementById('nav-pin-val').innerText = currentPin;
+        document.getElementById('room-pin-pill').style.display = 'inline-flex';
+        document.getElementById('lobby-pin').innerText = currentPin;
+        document.getElementById('lobby-category').innerText = currentCategory;
+        showToast(`Quiz Room #${currentPin} Created!`, 'success');
+        showScreen('screen-lobby');
+      });
+
+      socket.on('lobby:update', (data) => {
+        const players = data.players || [];
+        totalPlayersCount = players.length;
+        document.getElementById('player-count').innerText = players.length;
+        
+        const startBtn = document.getElementById('btn-start-game');
+        startBtn.disabled = players.length < 1;
+
+        const grid = document.getElementById('lobby-players-grid');
+        grid.innerHTML = '';
+
+        if (players.length === 0) {
+          grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-dim); padding: 2rem;">Waiting for players to join...</div>';
+          return;
+        }
+
+        players.forEach(p => {
+          const chip = document.createElement('div');
+          chip.className = 'player-chip';
+          chip.innerHTML = `
+            <div class="player-avatar">${p.name.charAt(0).toUpperCase()}</div>
+            <span>${p.name}</span>
+          `;
+          grid.appendChild(chip);
+        });
+
+        sounds.playTick();
+      });
+
+      socket.on('question:start', (data) => {
+        showScreen('screen-question');
+        document.getElementById('reveal-container').style.display = 'none';
+
+        // Reset option highlights
+        for (let i = 0; i < 4; i++) {
+          const card = document.getElementById(`opt-card-${i}`);
+          if (card) {
+            card.classList.remove('correct-highlight', 'dimmed');
+          }
+        }
+
+        // Set question info
+        document.getElementById('q-counter').innerText = `Question ${data.questionIndex} of ${data.totalQuestions}`;
+        document.getElementById('question-text').innerText = data.question;
+        document.getElementById('answer-progress-text').innerText = `0 / ${totalPlayersCount}`;
+
+        // Set options text
+        data.options.forEach((opt, idx) => {
+          const optEl = document.getElementById(`opt-text-${idx}`);
+          if (optEl) optEl.innerText = opt;
+        });
+
+        // Initialize Countdown timer UI
+        let seconds = data.timeLimitSeconds || 15;
+        const totalSec = seconds;
+        const timerEl = document.getElementById('timer-display');
+        const progressBar = document.getElementById('timer-progress-bar');
+        
+        timerEl.innerText = seconds;
+        timerEl.classList.remove('danger');
+        progressBar.style.width = '100%';
+
+        if (timerCountdownInterval) clearInterval(timerCountdownInterval);
+        
+        timerCountdownInterval = setInterval(() => {
+          seconds--;
+          if (seconds < 0) {
+            clearInterval(timerCountdownInterval);
+            return;
+          }
+          timerEl.innerText = seconds;
+          progressBar.style.width = `${(seconds / totalSec) * 100}%`;
+
+          if (seconds <= 4) {
+            timerEl.classList.add('danger');
+            sounds.playTick();
+          }
+        }, 1000);
+      });
+
+      socket.on('timer:tick', (data) => {
+        // Authoritative server clock sync
+        const remainingSeconds = Math.ceil(data.remainingMs / 1000);
+        const timerEl = document.getElementById('timer-display');
+        if (timerEl) {
+          timerEl.innerText = Math.max(0, remainingSeconds);
+          if (remainingSeconds <= 4) {
+            timerEl.classList.add('danger');
+          }
+        }
+      });
+
+      socket.on('answer:count_update', (data) => {
+        document.getElementById('answer-progress-text').innerText = `${data.answeredCount} / ${data.totalPlayers}`;
+      });
+
+      socket.on('question:time_up', (data) => {
+        if (timerCountdownInterval) clearInterval(timerCountdownInterval);
+        
+        const { correctOption, explanation } = data;
+
+        // Highlight correct card, dim others
+        for (let i = 0; i < 4; i++) {
+          const card = document.getElementById(`opt-card-${i}`);
+          if (card) {
+            if (i === correctOption) {
+              card.classList.add('correct-highlight');
+            } else {
+              card.classList.add('dimmed');
+            }
+          }
+        }
+
+        // Show explanation
+        document.getElementById('explanation-text').innerText = explanation;
+        document.getElementById('reveal-container').style.display = 'block';
+
+        sounds.playCorrect();
+      });
+
+      socket.on('leaderboard:update', (data) => {
+        const leaderboard = data.leaderboard || [];
+        // After showing answer for 2 seconds, switch to leaderboard intermission
+        setTimeout(() => {
+          if (document.getElementById('screen-question').classList.contains('active')) {
+            showScreen('screen-leaderboard');
+            renderLeaderboard(leaderboard, 'round-leaderboard-list');
+          }
+        }, 2200);
+      });
+
+      socket.on('quiz:ended', (data) => {
+        if (timerCountdownInterval) clearInterval(timerCountdownInterval);
+        showScreen('screen-final');
+        sounds.playFanfare();
+
+        const { winner, finalRanks } = data;
+        renderPodium(finalRanks || []);
+        renderLeaderboard(finalRanks || [], 'final-ranks-list');
+      });
+
+      socket.on('quiz:error', (data) => {
+        showToast(data.message, 'error');
+      });
+    }
+
+    function renderLeaderboard(list, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 1rem;">No scores recorded yet.</div>';
+        return;
+      }
+
+      list.forEach(p => {
+        const row = document.createElement('div');
+        row.className = `leaderboard-row rank-${p.rank}`;
+        
+        let medal = `#${p.rank}`;
+        if (p.rank === 1) medal = '🥇';
+        if (p.rank === 2) medal = '🥈';
+        if (p.rank === 3) medal = '🥉';
+
+        row.innerHTML = `
+          <div style="display: flex; align-items: center;">
+            <div class="rank-badge">${medal}</div>
+            <strong style="font-size: 1.1rem;">${p.name}</strong>
+          </div>
+          <div style="font-size: 1.25rem; font-weight: 800; color: #a5b4fc;">
+            ${p.score} <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">pts</span>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function renderPodium(ranks) {
+      // 1st
+      if (ranks[0]) {
+        document.getElementById('podium-name-1').innerText = ranks[0].name;
+        document.getElementById('podium-score-1').innerText = `${ranks[0].score} pts`;
+      }
+      // 2nd
+      if (ranks[1]) {
+        document.getElementById('podium-name-2').innerText = ranks[1].name;
+        document.getElementById('podium-score-2').innerText = `${ranks[1].score} pts`;
+      }
+      // 3rd
+      if (ranks[2]) {
+        document.getElementById('podium-name-3').innerText = ranks[2].name;
+        document.getElementById('podium-score-3').innerText = `${ranks[2].score} pts`;
+      }
+    }
+
+    function handleCreateQuiz(e) {
+      e.preventDefault();
+      initSocket();
+      const hostName = document.getElementById('host-name').value.trim() || 'Host';
+      const category = document.getElementById('category-select').value;
+      currentCategory = category;
+
+      socket.emit('quiz:create', { hostName, category });
+    }
+
+    function handleStartGame() {
+      if (!socket || !currentPin) return;
+      socket.emit('quiz:start', { pin: currentPin });
+    }
+  </script>
+</body>
+</html>
