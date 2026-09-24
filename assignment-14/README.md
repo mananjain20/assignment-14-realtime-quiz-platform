@@ -6,16 +6,6 @@ A high-performance, real-time multiplayer trivia platform built with **Node.js**
 
 ## 🌐 Live Deployment -   https://assignment-14-realtime-quiz-platform-2.onrender.com
 
-> **Live Application URL:**
-> 
-> ```
-> 
-> [ PASTE YOUR RENDER LIVE DEPLOYMENT URL HERE ]
-> 
-> Example: https://assignment-14-quiz-socket.onrender.com
-> 
-> ```
-
 ---
 
 ## 🚀 Key Features & Highlights
